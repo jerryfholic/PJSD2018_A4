@@ -15,7 +15,7 @@
 using namespace std;
 using namespace rapidjson;
 
-JsonFile::JsonFile(const char* filePath): filePath(filePath){
+JsonFile::JsonFile(const char* filePath): filePath(filePath){ //Constructor either parses the contents of an existing file or creates a new file with contents {"NULL":"null"} if none is found
 	doc = new Document;
 	file = new fstream;
 	if (updateDoc()) {
@@ -27,7 +27,7 @@ JsonFile::JsonFile(const char* filePath): filePath(filePath){
 	updateFile();
 }
 
-int JsonFile::updateDoc() {
+int JsonFile::updateDoc() {	//Updates the file with the current contents of file
 	string temp;
 	string line;
 
@@ -47,7 +47,7 @@ int JsonFile::updateDoc() {
 	}
 }
 
-int JsonFile::updateFile() {
+int JsonFile::updateFile() { //Updates the file with the current contents of doc
 	StringBuffer buffer;
 	Writer<StringBuffer> writer(buffer);
 	doc->Accept(writer);

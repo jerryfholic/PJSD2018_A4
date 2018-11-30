@@ -6,7 +6,7 @@
 <h1> Home Automation System for Timothy </h1>
 
 <?php
-	define("PATH_TO_JSON", "/PHP_CPP_COMM.json");
+	define("PATH_TO_JSON", "PHP_CPP_COMM.json");
 	$jsonFile = fopen(PATH_TO_JSON, r) or die("Unable to open file");
 	$jsonString = fread($jsonFile, filesize(PATH_TO_JSON));
 	fclose($jsonFile);
