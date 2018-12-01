@@ -12,6 +12,7 @@ To import this project into Eclipse:
 * Select File -> Import... -> General -> Projects from Folder or Archive -> Next
 * Directory... -> Navigate to .../PJSD2018_A4/RaspberryPi++
 * Click finish
+
 If you make a mistake and want to delete the project from Eclipse **make sure to uncheck "Delete project contents on disk"!**
 
 The project should work straight away, although you might have to change the IP-address for your Pi (Project properties -> C/C++ Build -> Settings -> Build steps).
