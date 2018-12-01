@@ -4,7 +4,7 @@ PJSD2018_A4
 
 ## WebServer:
 Includes /html/ directory, you can sync it to your Pi with `rsync -avP ./html/ pi@172.16.0.90:/home/pi/Documents/html`, then on your pi `sudo rsync -avP /home/pi/Documents/html /var/www/html`.
-Change the IP-adress or folder locations if necessary. Don't forget to edit the permissions for the JSON file on your Pi, so that the PHP and C++ code can edit it. The simplest, but unsecure way would be 'sudo chmod 777 <json file>'.
+Change the IP-adress or folder locations if necessary. Don't forget to edit the permissions for the JSON file on your Pi, so that the PHP and C++ code can edit it. The simplest, but unsecure way would be `sudo chmod 777 <json file>`.
 
 ## Eclipse project (RaspberryPi++):
 To import this project into Eclipse:
