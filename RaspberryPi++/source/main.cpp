@@ -1,60 +1,76 @@
+// Client side C/C++ program to demonstrate Socket programming
+// Geeks for Geeks and additions by Mathieu
 
-//============================================================================
-// Name        : main.cpp
-// Author      : Matthijs
-// Version     : 0.1
-// Description : Raspberri Pi main program
-//============================================================================
-#define FILE_PATH "/var/www/html/PHP_CPP_COMM.json" //Path to the JSON file used, change if necessary
+#define FILE_PATH "/home/pi/Documents/PI_client/client.json"
 
-//GPIO Pin 18
-#define LED_GPIO "18"
-#define LED_GPIO_PATH "/sys/class/gpio/gpio18/"
-#define GPIO_SYSFS "/sys/class/gpio/"
-
-#include <iostream>
-#include <fstream>
-#include <thread>
-
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include "JsonFile.h"
+#include <iostream>
+#define PORT 3000
 
 using namespace std;
 
-void LED_Setup();
-void writeFile(const char* filepath, const char* value);
-void writeValToLED(int val);
+int main(int argc, char const *argv[])
+{
+    int value = 0;
+    JsonFile json(FILE_PATH);
+    value = json.getIntValue("LedValue");
+    //json.print();
+    //json.edit("LedValue", 7);
+    //json.print();
+    //int value = 8;
+    struct sockaddr_in address;
+    int sock = 0, valread;
+    struct sockaddr_in serv_addr;
+    char const *buttons = "BUTTONS";
+    char const *leds = "LEDS";
+    char buffer[512] = {0};
+    char buffer2[512] = {0};
 
-int main() {
 
-	LED_Setup();
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        printf("\n Socket creation error \n");
+        return -1;
+    }
 
-	JsonFile json(FILE_PATH);
+    memset(&serv_addr, '0', sizeof(serv_addr));
 
-	for(int i = 0; i < 600; i++) {
-		this_thread::sleep_for(chrono::microseconds(1000000));	//Wait for 1 second
-		json.edit("Potmeter", i);								//Edit value for key "Potmeter"
-		writeValToLED(json.getIntValue("ToggleLed"));			//Write value for key "ToggleLed" to the LED
-		json.print();											//Print the contents of the JSON file
-	}
-	return 0;
-}
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
 
-void writeFile(const char* filepath, const char* value) {
-	ofstream file;			//Outputstream for writng to file
-	file.open(filepath);	//Open the file
-	file << value;			//Write value to file
-	file.close();			//Close the file
-}
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if(inet_pton(AF_INET, "192.168.4.3", &serv_addr.sin_addr)<=0)
+    {
+        printf("\nInvalid address/ Address not supported \n");
+        return -1;
+    }
 
-void LED_Setup() {
-	writeFile(GPIO_SYSFS "export", LED_GPIO);
-	writeFile(LED_GPIO_PATH "direction", "out");
-}
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        printf("\nConnection Failed \n");
+        return -1;
+    }
 
-void writeValToLED(int val) {
-	if(0 < val && val <= 1) {
-		writeFile(LED_GPIO_PATH "value", to_string(val).c_str() );
-	} else {
-		cout << "Invalid LED value" << endl;
-	}
+    send(sock , leds , strlen(leds) , 0 );
+    valread = read( sock , buffer, 512);
+    printf("%s\n",buffer );
+    buffer[512] = {0};
+
+    //write()
+    send(sock , &value , 1 , 0);
+    printf("Leds data sent\n");
+
+    send(sock , buttons , strlen(buttons), 0 );
+    printf("Button request\n");
+    valread = read( sock , buffer2, 512);
+    printf("Button value = %s\n", buffer2);
+    buffer2[1024] = {0};
+    return 0;
 }
