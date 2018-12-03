@@ -32,6 +32,7 @@ void setup() {
   IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
   WiFi.config(ip, gateway, subnet);
 
+/*
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -43,6 +44,8 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   wifiServer.begin();
+*/
+  
 }
 
 void loop() {
@@ -101,6 +104,26 @@ void loop() {
 
     client.stop();
     Serial.println("Client disconnected");
-
   }
+
+  Wire.beginTransmission(0x38);
+  Wire.write(byte(0x00));
+  Wire.endTransmission();
+  Wire.requestFrom(0x38, 1);
+  unsigned char schakelaar = Wire.read();
+  schakelaar = schakelaar & 0x01;
+
+  if(schakelaar == 0x00){
+      Wire.beginTransmission(0x38); 
+      Wire.write(byte(0x01));            
+      Wire.write(byte(15<<4));            
+      Wire.endTransmission();     
+  }
+  if(schakelaar == 0x01){
+      Wire.beginTransmission(0x38); 
+      Wire.write(byte(0x01));            
+      Wire.write(byte(0<<4));            
+      Wire.endTransmission();  
+  }
+  
 }
