@@ -3,13 +3,16 @@
 
 #define I2C_SDL    D1
 #define I2C_SDA    D2
+#define AAN true
+#define UIT false
 
 const char* ssid = "RaspberryA4";
 const char* password =  "kamerplant";
 char buffer_array[3];
 int i = 0;
-bool new_data_flag = false;
+bool new_data_flag = false, led_status = false, led_update = true;
 String request;
+unsigned char vorige_schakelaar = 0x00, schakelaar;
 
 WiFiServer wifiServer(80);
 
@@ -27,6 +30,11 @@ void setup() {
   Wire.write(byte(0x0F));         
   Wire.endTransmission();
 
+  Wire.beginTransmission(0x38); 
+  Wire.write(byte(0x01));            
+  Wire.write(byte(0<<4));            
+  Wire.endTransmission();
+     
   IPAddress ip(10,10,10,20); // where xx is the desired IP Address
   IPAddress gateway(10,10,10,1); // set gateway to match your network 
   IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
@@ -110,20 +118,53 @@ void loop() {
   Wire.write(byte(0x00));
   Wire.endTransmission();
   Wire.requestFrom(0x38, 1);
-  unsigned char schakelaar = Wire.read();
+  schakelaar = Wire.read();
   schakelaar = schakelaar & 0x01;
 
-  if(schakelaar == 0x00){
-      Wire.beginTransmission(0x38); 
-      Wire.write(byte(0x01));            
-      Wire.write(byte(15<<4));            
-      Wire.endTransmission();     
-  }
   if(schakelaar == 0x01){
-      Wire.beginTransmission(0x38); 
-      Wire.write(byte(0x01));            
-      Wire.write(byte(0<<4));            
-      Wire.endTransmission();  
+    if(led_update == true){
+      if(led_status == false){
+        led_status = true;
+        
+        Wire.beginTransmission(0x38); 
+        Wire.write(byte(0x01));            
+        Wire.write(byte(15<<4));            
+        Wire.endTransmission();
+        
+        led_update = false;
+        Serial.println("leds aan");      
+      }      
+    }
+    if(led_update == true){
+      if(led_status == true){
+        led_status = false;
+        
+        Wire.beginTransmission(0x38); 
+        Wire.write(byte(0x01));            
+        Wire.write(byte(0<<4));            
+        Wire.endTransmission();
+        
+        led_update = false;
+        Serial.println("leds uit");      
+      }        
+    }
   }
-  
+
+  if(schakelaar == 0x00){
+    led_update = true;
+  }
+/*
+  if(led_status = true){
+    Wire.beginTransmission(0x38); 
+    Wire.write(byte(0x01));            
+    Wire.write(byte(15<<4));            
+    Wire.endTransmission();
+  }
+  if(led_status = false){
+     Wire.beginTransmission(0x38); 
+     Wire.write(byte(0x01));            
+     Wire.write(byte(0<<4));            
+     Wire.endTransmission();
+  }
+  */
 }
