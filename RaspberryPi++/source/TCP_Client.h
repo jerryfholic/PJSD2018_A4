@@ -23,20 +23,19 @@ class TCP_Client
 {
 public:
 	TCP_Client(const char *address, int port);
-	void TCP_socket();
-	void createSocket();
-	bool connectToServer(string, int);
-	bool sendString(char const *str);
-
-	void receive();
+	int createSocket();
+	bool connectToServer();
+	int disconnectFromServer();
+	int sendValue(string key, string value);
+	const char* receiveValue(string);
 
 private:
 	int sock;
 	int port;
 	struct sockaddr_in serv_addr;
 	const char *ip_address;
-	char buffer[1024];
-	int valread;
+
+	int sendString(string str);
 
 };
 
