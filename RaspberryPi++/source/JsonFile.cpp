@@ -80,27 +80,21 @@ void JsonFile::fill(const char* input) {
 }
 
 int JsonFile::getIntValue(const char* key) {
-	assert(!updateDoc());
 	assert((*doc)[key].IsInt());
 	return (*doc)[key].GetInt();
 }
 
 const char* JsonFile::getStringValue(const char* key) {
-	assert(!updateDoc());
 	assert((*doc)[key].IsString());
 	return (*doc)[key].GetString();
 }
 
 void JsonFile::edit(const char* key, int newVal) {
-	assert(!updateDoc());
 	assert(doc->HasMember(key));
 	(*doc)[key].SetInt(newVal);
-	assert(!updateFile());
 }
 
 void JsonFile::edit(const char* key, string newVal) {
-	assert(!updateDoc());
 	assert(doc->HasMember(key));
 	(*doc)[key].SetString(newVal.c_str(), newVal.length());
-	assert(!updateFile());
 }
