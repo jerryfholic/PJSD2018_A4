@@ -7,37 +7,35 @@
 
 #include "TCP_Client.h"
 
-TCP_Client::TCP_Client(const char* address, int poort)
+TCP_Client::TCP_Client(const char* address, int poort):ip_address(address),port(poort),sock(-1)
 {
-	ip_address = address;
-	port = poort;
-	TCP_socket();
-	createSocket();
+	createSocket();		//Create a socket when creating an object
 }
 
-void TCP_Client::TCP_socket()
+int TCP_Client::createSocket()
 {
-	sock = -1;
-}
-
-void TCP_Client::createSocket()
-{
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	sock = socket(AF_INET, SOCK_STREAM, 0);		//Creates a TCP IPv4 socket
 	if(sock == -1)
 	{
-		//TODO Socket creating error
+		cout << "Socket creation error\n";
 	}
+	else
+	{
 	cout  << "Socket created\n";
+	}
+	return sock;
 }
 
-bool TCP_Client::connectToServer(string address, int)
+bool TCP_Client::connectToServer()
 {
+	/*		Overig
 	//create socket if it isnt created yet!
 	if(sock == -1)
 	{
 		createSocket();
+		cout << "Socket already created!\n";
 	}
-	else{}
+	else{}*/
 
 	memset(&serv_addr, 0, sizeof(serv_addr));
 
@@ -47,30 +45,50 @@ bool TCP_Client::connectToServer(string address, int)
 
 
 	//IP address conversion to binary
-	if(inet_pton(AF_INET, "192.168.4.3", &serv_addr.sin_addr)<=0)
+	if(inet_pton(AF_INET, ip_address, &serv_addr.sin_addr)<=0)
 	    {
 	        printf("\nInvalid address/ Address not supported \n");
 	        return -1;
 	    }
 
-	if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+	if(connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 	    {
 	        printf("\nConnection Failed \n");
 	        return -1;
 	    }
+
+	else
+	{
 	return 0;
+	}
 }
 
 
-bool TCP_Client::sendString(char const *str)
+int TCP_Client::sendString(string str)
 {
-	send(sock, str, strlen(str), 0);
-	return 0;
+	return send(sock, str.c_str(), str.length(), 0);		//Sending a string and returning the bytes transmitted or -1 when an error occurs
 }
 
-void TCP_Client::receive()
+
+int TCP_Client::sendValue(string key, string value)
 {
-	valread = read(sock, buffer, 1024);
-	printf("%s\n",buffer);
-	buffer[1024] = {0};
+	string sendformat = "{\"" + key + "\":\"" + value + "\"}";		//Putting the key and value in json format
+	return sendString(sendformat);									//Sending the key and value. Returning the bytes transmitted or -1 when an error occurs.
 }
+
+const char* TCP_Client::receiveValue(string key)
+{
+	sendString(key);	//First send the key where you want the value from
+
+	char buffer[1024] = {0};		//creating a buffer
+	read(sock, buffer, 1024);		//Reading the value from the socket
+	return buffer;					//returning the value
+	//Debug printf("%s\n",buffer);
+}
+
+
+int TCP_Client::disconnectFromServer()	//function maybe not needed
+{
+	return close(sock);
+}
+
